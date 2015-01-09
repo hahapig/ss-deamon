@@ -18,7 +18,7 @@ Spring和qz定时调度任务的整合
   ScheduleAnnotationProcessor，解析注解，生成JobDetail和trriger，并加入到调度队列。JobDetail作为一个描述性对象，
   不会真的执行。JobDelegate才是定时任务的执行对象。
   
-5.job包为需要执行的定时任务@ScheduleAnnotation，标示这个类会解析为普通的定时任务。service包为各个定时任务执行时需要依赖的底层服务
+5.job包为需要执行的定时任务。@ScheduleAnnotation标示这个类会解析为普通的定时任务。service包为各个定时任务执行时需要依赖的底层服务
 
 ################################################
 这里的动态数据源不支持跨数据库事务，若需要事务，可以将事务注解标注到service上面。数据源切换也是以service为最小单位。
