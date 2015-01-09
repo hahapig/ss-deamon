@@ -3,7 +3,7 @@
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="orderService">
 	
-	<select id="getExpiredOrder" resultType="com.taihe.schedule.entity.OrderInfo" parameterType="Map"> 
+	<select id="getExpiredOrder" resultType="xxxxx" parameterType="Map"> 
 		select 
 			o.order_id orderId,
 			orderstatus,
@@ -48,7 +48,7 @@
 				)
 	</update>
 	
-	<select id="getPaidConsignedOrderByAct" resultType="com.taihe.schedule.entity.OrderInfo" parameterType="Map"> 
+	<select id="getPaidConsignedOrderByAct" resultType="xxxx" parameterType="Map"> 
 		select 
 			o.order_id orderId,
 			orderstatus,
@@ -79,7 +79,7 @@
 				)
 	</select>
 	
-	<select id="getLatestOrderByAct" resultType="com.taihe.schedule.entity.OrderInfo" parameterType="Map">
+	<select id="getLatestOrderByAct" resultType="xxxxx" parameterType="Map">
 		select 
 			o.order_id orderId,
 			orderstatus,

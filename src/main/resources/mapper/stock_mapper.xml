@@ -58,7 +58,7 @@
 			activityid=#{activityId} and type=0
 	</update>
 	
-	<select id="getPaidConsignedTicketsByOrder" resultType="com.taihe.schedule.entity.ConsignedTicket" parameterType="Map">
+	<select id="getPaidConsignedTicketsByOrder" resultType="xxxxx" parameterType="Map">
 		select 
 			consignationid,
 			activityid,
@@ -75,7 +75,7 @@
 			and type=1
 	</select>
 	
-	<insert id="insertBalanceInfo" parameterType="com.taihe.schedule.entity.Balance">
+	<insert id="insertBalanceInfo" parameterType="xxxx">
 		insert into balance
 			(activityid,
 			userid,
@@ -112,7 +112,7 @@
 			) s
 	</select>
 	
-	<insert id="insertActReport" parameterType="com.taihe.schedule.entity.ActReport">
+	<insert id="insertActReport" parameterType="xxxxx">
 		insert into actireport(
 			activityid,
 			actname,
@@ -162,14 +162,14 @@
 		productid, productname, siteid, oriprice, retprice, pacprice, picaddr, norms, period, status, protype, prodes, endtime, createtime, opetime
 	</sql>
 	
-	<select id="getExpiredGoods" resultType="com.taihe.schedule.entity.Goods">
+	<select id="getExpiredGoods" resultType="xxxxx">
 		SELECT 
 		<include refid="Base_Goods_List"/>
 		FROM goods 
 		WHERE endtime&lt;now() and status=1
 	</select>
 	
-	<update id="updateExpiredGoods" parameterType="com.taihe.schedule.entity.Goods">
+	<update id="updateExpiredGoods" parameterType="xxxxx">
 		UPDATE goods 
 		SET status = 2,protype=2 
 		WHERE productid = #{productId}
