@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<bean id="IOCJobFactory" class="com.taihe.schedule.core.support.impl.IOCJobFactory"></bean>
+	
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="jobFactory" ref="IOCJobFactory" />
+		<property name="configLocation" >
+			<value>file:/var/showstart/config/showstart.properties</value>
+		</property>
+			
+	</bean>
+	<!-- BeanPostProcessor接口不能同时使用注解和配置 -->
+	<bean id="AnnotationProcessor" class="com.taihe.schedule.core.support.impl.ScheduleAnnotationProcessor"></bean>
+	<!-- 暂时先用配置，以后改用数据库配置 -->
+	<bean id="config" class="com.taihe.schedule.core.utils.ConfigReader">
+		<property name="configMap">
+		   <map>
+			    <entry key="activityJob.cleanExpiredActivity">
+			     <value>0 0/1 * * * ?</value>
+			    </entry>
+			    
+			     <entry key="default_heartbeat.beat">
+			     <value>0/5 * * * * ?</value>
+			    </entry>
+			    
+			     <entry key="orderJob.cleanExpiredOrder">
+			     <value>0 0/1 * * * ?</value>
+			    </entry>
+			    
+			      <entry key="fundJob.handleActivityAccordFund">
+			     <value>0/10 * * * * ?</value>
+			    </entry>
+			    
+			      <entry key="activityJob.generateActReport">
+			     <value>0/10 * * * * ?</value>
+			    </entry>
+		   </map>
+	  	</property>
+	</bean>
+		
+</beans>

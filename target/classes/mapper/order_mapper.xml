@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="orderService">
+	
+	<select id="getExpiredOrder" resultType="com.taihe.schedule.entity.OrderInfo" parameterType="Map"> 
+		select 
+			o.order_id orderId,
+			orderstatus,
+			ordertype,
+			paymentstatus,
+			totalAmount,
+			totalNum,
+			amountpayable,
+			amountpaid,
+			orderdetail_id,
+			activity_id,
+			price,
+			num,
+			ddate,
+			mid_stockid
+		from 
+			t_order o left join t_orderdetail d on o.order_id = d.order_id
+		where 
+			orderstatus=1 
+			and vdate&lt;= #{date} 
+			limit 0,#{count}
+	</select>
+	
+	<update id="setToExpired" parameterType="Map">
+		update t_order
+			set orderstatus=9
+		where order_id=#{orderId} and orderstatus=1
+	</update>
+	
+	<update id="cancelOrder" parameterType="Map">
+		UPDATE t_order
+		SET orderstatus = 4
+		WHERE
+			orderstatus = 1
+			and order_id IN (
+				SELECT
+					order_id
+				FROM
+					t_orderdetail
+				WHERE
+					activity_id = #{activityId}
+				)
+	</update>
+	
+	<select id="getPaidConsignedOrderByAct" resultType="com.taihe.schedule.entity.OrderInfo" parameterType="Map"> 
+		select 
+			o.order_id orderId,
+			orderstatus,
+			ordertype,
+			paymentstatus,
+			totalAmount,
+			totalNum,
+			amountpayable,
+			amountpaid,
+			orderdetail_id,
+			activity_id,
+			price,
+			num,
+			ddate,
+			mid_stockid,
+			customer_id
+		from 
+			t_order o left join t_orderdetail d on o.order_id = d.order_id
+		where 
+			orderstatus=3 and (ordertype=2 or ordertype=3)
+			and o.order_id IN (
+				SELECT
+					order_id
+				FROM
+					t_orderdetail
+				WHERE
+					activity_id = #{activityId}
+				)
+	</select>
+	
+	<select id="getLatestOrderByAct" resultType="com.taihe.schedule.entity.OrderInfo" parameterType="Map">
+		select 
+			o.order_id orderId,
+			orderstatus,
+			ordertype,
+			paymentstatus,
+			totalAmount,
+			totalNum,
+			amountpayable,
+			amountpaid,
+			orderdetail_id,
+			activity_id,
+			price,
+			num,
+			ddate,
+			mid_stockid
+		from 
+			t_order o left join t_orderdetail d on o.order_id = d.order_id
+		where 
+			orderstatus=3 
+			and activity_id = #{actId} 
+			ORDER BY vdate DESC
+			limit 0,1
+	</select>
+	
+	<select id="getNormalOrderAmount" resultType="Double">
+		select 
+			IFNULL(sum(totalAmount),0)
+		from 
+			t_order o left join t_orderdetail d on o.order_id = d.order_id
+		where 
+			orderstatus=3 
+			and ordertype=1
+			and activity_id = #{activityId} 
+	</select>
+	
+	<update id="cancelExpired" parameterType="Map">
+		update t_order
+			set orderstatus=1
+		where order_id=#{orderId} and orderstatus=9
+	</update>
+</mapper>

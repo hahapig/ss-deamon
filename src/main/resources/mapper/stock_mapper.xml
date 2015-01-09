@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="stockService">
+	<update id="cleanStock" parameterType="Map">
+		update 
+			stocks
+		set totalstocks = 0 
+		where  activityid=#{activityId}
+	</update>
+	
+	<update id="cancelMidStock" parameterType="Map">
+		update 
+			middle_stocks
+		set paytype = 2 
+		where  
+			activityid=#{activityId} 
+			and paytype=0
+	</update>
+	
+	<update id="cleanConsignedNum" parameterType="Map">
+		update 
+			consignednum
+		set totalnum = 0 
+		where  
+			activityid=#{activityId} 
+	</update>
+	
+	<update id="addConsignedNum" parameterType="Map">
+		update 
+			consignednum
+		set locknum = locknum-#{num} 
+		where  
+			activityid=#{activityId} and locknum >=#{num} and totalnum >=#{num}
+	</update>
+	
+	<update id="cancelMidStockByMidStockId" parameterType="Map">
+		update 
+			middle_stocks
+		set paytype = 2
+		where  
+			mid_stockid=#{midStockId} and paytype=0
+	</update>
+	
+	<update id="cancelConsignedticketsByOrder" parameterType="Map">
+		update 
+			consignedtickets
+		set type = 2
+		where  
+			orderid=#{orderId} and type=0
+	</update>
+	
+	<update id="cancelConsignedticketsByActivity" parameterType="Map">
+		update 
+			consignedtickets
+		set type = 2
+		where  
+			activityid=#{activityId} and type=0
+	</update>
+	
+	<select id="getPaidConsignedTicketsByOrder" resultType="com.taihe.schedule.entity.ConsignedTicket" parameterType="Map">
+		select 
+			consignationid,
+			activityid,
+			ticketid,
+			orderid,
+			consignation_time,
+			fromuser,
+			touser,
+			type,
+			price
+		from consignedtickets
+		where 
+			orderid=#{orderId} 
+			and type=1
+	</select>
+	
+	<insert id="insertBalanceInfo" parameterType="com.taihe.schedule.entity.Balance">
+		insert into balance
+			(activityid,
+			userid,
+			consigedamount,
+			type)
+		values(
+			#{activityid},
+			#{userid},
+			#{consigedamount},
+			#{type}
+		)
+	</insert>
+	
+	<select id="getTicketCount" resultType="Integer"> 
+		select count(*) 
+		from tickets
+		where activityid = #{activityId}
+	</select>
+	
+	<select id="getConsignCount" resultType="Integer">
+		select count(*) from (
+			select distinct(ticketid) 
+				from consignedtickets
+					where type=1 and activityid=#{activityId}
+			) s
+	</select>
+	
+	<select id="getConsignsum" resultType="Double">
+		select IFNULL(sum(price),0) from (
+			select ticketid ,price
+				from consignedtickets
+					where type=1 and activityid=#{activityId}
+			GROUP BY ticketid,price
+			) s
+	</select>
+	
+	<insert id="insertActReport" parameterType="com.taihe.schedule.entity.ActReport">
+		insert into actireport(
+			activityid,
+			actname,
+			needmoney,
+			finalmoney,
+			usefund,
+			fundmoney,
+			artrebate,
+			siterebate,
+			platincome,
+			consignincome,
+			finalgain,
+			ticketamount,
+			ticketsum,
+			consignamount,
+			consignsum,
+			acttime,
+			reptime)
+		values(
+			#{activityid},
+			#{actname},
+			#{needmoney},
+			#{finalmoney},
+			#{usefund},
+			#{fundmoney},
+			#{artrebate},
+			#{siterebate},
+			#{platincome},
+			#{consignincome},
+			#{finalgain},
+			#{ticketamount},
+			#{ticketsum},
+			#{consignincome},
+			#{consignsum},
+			#{acttime},
+			#{reptime}
+		)
+	</insert>
+	
+	<select id="existedReport" resultType="Integer">
+		select count(*) 
+		from actireport
+		where activityid=#{activityId}
+	</select>
+	
+	<sql id="Base_Goods_List">
+		productid, productname, siteid, oriprice, retprice, pacprice, picaddr, norms, period, status, protype, prodes, endtime, createtime, opetime
+	</sql>
+	
+	<select id="getExpiredGoods" resultType="com.taihe.schedule.entity.Goods">
+		SELECT 
+		<include refid="Base_Goods_List"/>
+		FROM goods 
+		WHERE endtime&lt;now() and status=1
+	</select>
+	
+	<update id="updateExpiredGoods" parameterType="com.taihe.schedule.entity.Goods">
+		UPDATE goods 
+		SET status = 2,protype=2 
+		WHERE productid = #{productId}
+	</update>
+</mapper>
+ 
+	
+	

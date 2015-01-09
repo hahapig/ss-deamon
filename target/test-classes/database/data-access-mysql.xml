@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+		       	http://www.springframework.org/schema/beans 
+			    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+				http://www.springframework.org/schema/context 
+				http://www.springframework.org/schema/context/spring-context-3.0.xsd
+				http://www.springframework.org/schema/tx 
+				http://www.springframework.org/schema/tx/spring-tx-3.0.xsd 
+				http://www.springframework.org/schema/aop 
+				http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+				http://www.springframework.org/schema/util 
+				http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+
+	<!--配置c3p0数据源 -->
+	<bean id="stockDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass" value="${stock.jdbc.driverClassName}" />
+		<property name="jdbcUrl" value="${stock.jdbc.url}" />
+		<property name="user" value="${stock.jdbc.username}" />
+		<property name="password" value="${stock.jdbc.password}" />
+		<property name="initialPoolSize" value="1" />
+		<property name="minPoolSize" value="1" />
+		<property name="maxPoolSize" value="2" />
+		<property name="maxIdleTime" value="25000" />
+		<property name="acquireIncrement" value="1" />
+		<property name="idleConnectionTestPeriod" value="60" />
+		<property name="testConnectionOnCheckout" value="true" />
+		<property name="testConnectionOnCheckin" value="true" />
+		<property name="checkoutTimeout" value="2000" />
+		<property name="preferredTestQuery" value="select now() " />
+	</bean>
+
+	<!--配置c3p0数据源 -->
+	<bean id="orderDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass" value="${order.jdbc.driverClassName}" />
+		<property name="jdbcUrl" value="${order.jdbc.url}" />
+		<property name="user" value="${order.jdbc.username}" />
+		<property name="password" value="${order.jdbc.password}" />
+		<property name="initialPoolSize" value="1" />
+		<property name="minPoolSize" value="1" />
+		<property name="maxPoolSize" value="2" />
+		<property name="maxIdleTime" value="25000" />
+		<property name="acquireIncrement" value="1" />
+		<property name="idleConnectionTestPeriod" value="60" />
+		<property name="testConnectionOnCheckout" value="true" />
+		<property name="testConnectionOnCheckin" value="true" />
+		<property name="checkoutTimeout" value="2000" />
+		<property name="preferredTestQuery" value="select now() " />
+	</bean>
+	<!-- 尼玛，让我直连各种数据库 -->
+	<bean class="com.taihe.schedule.core.dynamic.DynamicDataSource"
+		id="dataSource">
+		<property name="lenientFallback"><value>false</value></property>
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry value-ref="stockDataSource" key="stockDataSource"></entry>
+				<entry value-ref="orderDataSource" key="orderDataSource"></entry>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" ref="stockDataSource"></property>
+	</bean>
+
+	<!-- 配置通用DAO -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="mapperLocations" value="classpath:mapper/*.xml" />
+	</bean>
+
+	<!-- 尼玛，动态切数据源的配置 -->
+	<bean
+		class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+		<property name="beanNames" value="*Service*" />
+		<property name="interceptorNames">
+			<list>
+				<value>dynamicMethodInterceptor</value>
+			</list>
+		</property>
+	</bean>
+
+	<!--通过模板定制mybatis的行为 -->
+	<bean id="sqlSessionTemplateSimple" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+		<!--更新采用单个模式 -->
+		<constructor-arg index="1" value="SIMPLE" />
+	</bean>
+
+	<!-- 事务管理器 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="stockDataSource" />
+        <qualifier value="stock_tps" />
+	</bean>
+	<tx:annotation-driven order="100" transaction-manager="transactionManager" mode="aspectj" />
+</beans>

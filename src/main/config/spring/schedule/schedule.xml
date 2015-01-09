@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<bean id="IOCJobFactory" class="com.taihe.schedule.core.support.impl.IOCJobFactory"></bean>
+
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="jobFactory" ref="IOCJobFactory" />
+		<property name="configLocation">
+			<value>file:/var/showstart/config/showstart.properties</value>
+		</property>
+
+	</bean>
+	<!-- BeanPostProcessor接口不能同时使用注解和配置 -->
+	<bean id="AnnotationProcessor"
+		class="com.taihe.schedule.core.support.impl.ScheduleAnnotationProcessor"></bean>
+	<!-- 暂时先用配置，以后改用数据库配置 -->
+	<bean id="config" class="com.taihe.schedule.core.utils.ConfigReader">
+		<property name="configMap">
+			<map>
+				<entry key="activityJob.updateToComplete">
+					<value>0 0/60 * * * ?</value>
+				</entry>
+				
+				<entry key="activityJob.generateActReport">
+					<value>0 0 0/1 * * ?</value>
+				</entry>
+				
+				<entry key="activityJob.cleanRaisingAct">
+					 <value>0 0/30 * * * ?</value>
+				</entry>
+				
+				<entry key="activityJob.switchToShowing">
+					<value>0 0/30 * * * ?</value>
+				</entry>
+				<entry key="activityJob.switchTrailerToShowing">
+					<value>0 0/35 * * * ?</value>
+				</entry>
+				<entry key="activityJob.switchToSellOver">
+					<value>0 0/30 * * * ?</value><!-- 定为每30分钟执行 -->
+				</entry>
+				
+				<entry key="default_heartbeat.beat">
+					<value>0 0/20 * * * ?</value>
+				</entry>
+
+				<entry key="orderJob.cleanExpiredOrder">
+					<value>0 0/2 * * * ?</value><!-- 每2分钟-->
+				</entry>
+
+				<entry key="fundJob.handleActivityAccordFund">
+					<value>0 0 0 * * ? *</value>
+				</entry>
+				
+				<entry key="infoJob.generateCalenderForSiteAndPerformer">
+					<value>0 0 0 * * ? *</value>
+				</entry>
+				
+				<entry key="infoJob.deleteExpiredCalendarEvent">
+					<value>0 0 0 * * ? *</value><!-- 每天晚上12点 -->
+				</entry>
+				
+				<!-- 清理过期商品 （15分）-->
+				<entry key="stockJob.cleanExpiredGoods">
+					<value>0 0/15 * * * ?</value>
+				</entry>
+				
+				<!-- 更新验票（59分钟） -->
+				<entry key="stockJob.checkedTickets">
+					<value>0 0/59 * * * ?</value>
+				</entry>
+				
+			</map>
+		</property>
+	</bean>
+
+</beans>
